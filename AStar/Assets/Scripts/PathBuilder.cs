@@ -49,7 +49,7 @@ public class PathBuilder : MonoBehaviour
     foreach (var tile in tileMap.tilesCollection)
     {
       tile.transform.position = new Vector3(tile.transform.position.x, 0, tile.transform.position.z);
-      tile.GetComponent<Renderer>().material = tile.DefaultMaterial;
+      //tile.GetComponent<Renderer>().material = tile.DefaultMaterial;
     }
   }
 

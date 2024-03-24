@@ -3,22 +3,34 @@ using UnityEngine;
 using Pathing;
 using System.Linq;
 using System;
+using Zenject;
 
-public class Tile : MonoBehaviour, IAStarNode
+public class Tile : MonoBehaviour, IAStarNode, ITile
 {
-  public (int X, int Z) coordinates;
+  //public (int X, int Z) coordinates;
+  public (int X, int Z) Coordinates {get;set;}
   public Material DefaultMaterial { get; private set; }
   [field: SerializeField] public int Cost { get; private set; }
   [field: SerializeField] public Material HighlightMaterial { get; private set; }
   [field: SerializeField] public Material SelectedMaterial { get; private set; }
   [field: SerializeField] public Material PartOfThePathMaterial { get; private set; }
-  private TileMap tileMap;
+  [Inject]
+  private TileMap _tileMap;
 
-  void Start()
-  {
-    tileMap = FindObjectOfType<TileMap>();
-    DefaultMaterial = GetComponent<Renderer>().material;
-  }
+  [Inject]
+    public void Construct(TileMap tileMap)
+    {
+        _tileMap = tileMap;
+        InitializeTile();
+    }
+  private void InitializeTile()
+    {
+        DefaultMaterial = GetComponent<Renderer>().material;
+    }
+    void Awake()
+    {
+      _tileMap = FindObjectOfType<TileMap>();
+    }
   private void AddNeighbour(Tile? tile, List<Tile> neighbours)
   {
     if (tile != null)
@@ -33,24 +45,24 @@ public class Tile : MonoBehaviour, IAStarNode
 
   public IEnumerable<Tile> GetNeighbours()
   {
+    Debug.Log("tilemap value: " + _tileMap);
     List<Tile> neighbourList = new();
-    bool oddRow = coordinates.Z % 2 == 1;
-
-    AddNeighbour(tileMap.FindFile((coordinates.X - 1, coordinates.Z)), neighbourList);//left
-    AddNeighbour(tileMap.FindFile((coordinates.X + 1, coordinates.Z)), neighbourList);//right
+    bool oddRow = Coordinates.Z % 2 == 1;
+    AddNeighbour(_tileMap.FindTile((Coordinates.X - 1, Coordinates.Z)), neighbourList);//left
+    AddNeighbour(_tileMap.FindTile((Coordinates.X + 1, Coordinates.Z)), neighbourList);//right
     if (oddRow)
     {
-      AddNeighbour(tileMap.FindFile((coordinates.X, coordinates.Z + 1)), neighbourList);
-      AddNeighbour(tileMap.FindFile((coordinates.X - 1, coordinates.Z + 1)), neighbourList);
-      AddNeighbour(tileMap.FindFile((coordinates.X - 1, coordinates.Z - 1)), neighbourList);
-      AddNeighbour(tileMap.FindFile((coordinates.X, coordinates.Z - 1)), neighbourList);
+      AddNeighbour(_tileMap.FindTile((Coordinates.X, Coordinates.Z + 1)), neighbourList);
+      AddNeighbour(_tileMap.FindTile((Coordinates.X - 1, Coordinates.Z + 1)), neighbourList);
+      AddNeighbour(_tileMap.FindTile((Coordinates.X - 1, Coordinates.Z - 1)), neighbourList);
+      AddNeighbour(_tileMap.FindTile((Coordinates.X, Coordinates.Z - 1)), neighbourList);
     }
     else
     {
-      AddNeighbour(tileMap.FindFile((coordinates.X + 1, coordinates.Z - 1)), neighbourList);
-      AddNeighbour(tileMap.FindFile((coordinates.X, coordinates.Z + 1)), neighbourList);
-      AddNeighbour(tileMap.FindFile((coordinates.X, coordinates.Z - 1)), neighbourList);
-      AddNeighbour(tileMap.FindFile((coordinates.X + 1, coordinates.Z + 1)), neighbourList);
+      AddNeighbour(_tileMap.FindTile((Coordinates.X + 1, Coordinates.Z - 1)), neighbourList);
+      AddNeighbour(_tileMap.FindTile((Coordinates.X, Coordinates.Z + 1)), neighbourList);
+      AddNeighbour(_tileMap.FindTile((Coordinates.X, Coordinates.Z - 1)), neighbourList);
+      AddNeighbour(_tileMap.FindTile((Coordinates.X + 1, Coordinates.Z + 1)), neighbourList);
     }
     return neighbourList.AsEnumerable();
   }
@@ -70,7 +82,7 @@ public class Tile : MonoBehaviour, IAStarNode
   }
   private float GetEstimatedCost(Tile goal)
   {
-    float distance = Mathf.Abs(coordinates.X - goal.coordinates.X) + MathF.Abs(coordinates.Z - goal.coordinates.Z);
+    float distance = Mathf.Abs(Coordinates.X - goal.Coordinates.X) + MathF.Abs(Coordinates.Z - goal.Coordinates.Z);
     return distance * Cost;
   }
 }

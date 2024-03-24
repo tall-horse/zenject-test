@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Linq;
+using Zenject;
 
 public class TileMap : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class TileMap : MonoBehaviour
   private List<(int, int)> forests;
   private List<(int, int)> mountains;
   private List<(int, int)> waters;
-  [SerializeField] private List<Tile> tilePrefabs = new(5);
+  [SerializeField] private List<GameObject> tilePrefabs = new(5);
   // Start is called before the first frame update
   void Start()
   {
@@ -63,7 +64,7 @@ public class TileMap : MonoBehaviour
     {
       for (int z = 0; z < MapSizeZ; z++)
       {
-        GameObject go;
+        Tile tile;
         Vector3 spawnPosition;
         //Giving offset for spawned tiles 
         if (z % 2 > 0)
@@ -74,21 +75,22 @@ public class TileMap : MonoBehaviour
         {
           spawnPosition = new Vector3(x, 0, z + OffsetZ * z);
         }
-        go = Instantiate(tilePrefabs[mapData.FirstOrDefault(t => t.Key == (x, z)).Value].gameObject, spawnPosition, Quaternion.identity);
-        go.transform.SetParent(transform);
-        Tile tile = go.GetComponent<Tile>();
-        tile.coordinates = (x, z);
+        tile = Instantiate(tilePrefabs[mapData.FirstOrDefault(t => t.Key == (x, z)).Value].gameObject, spawnPosition, Quaternion.identity).GetComponent<Tile>();
+        tile.Construct(this);
+        tile.transform.SetParent(transform);
+        tile.Coordinates = (x, z);
         tilesCollection.Add(tile);
-        go.GetComponentInChildren<TextMeshProUGUI>().text = tile.coordinates.X + "," + tile.coordinates.Z;
+        tile.GetComponentInChildren<TextMeshProUGUI>().text = tile.Coordinates.X + "," + tile.Coordinates.Z;
       }
 
     }
   }
-  public Tile FindFile((int x, int z) coords)
+  
+  public Tile FindTile((int x, int z) coords)
   {
     foreach (var t in tilesCollection)
     {
-      if(t.coordinates == coords && t.Cost != -1)
+      if(t.Coordinates == coords && t.Cost != -1)
       return t;
     }
     return null;
