@@ -12,48 +12,91 @@ public class TileMap : MonoBehaviour
   [HideInInspector] public List<Tile> tilesCollection;
   private const float OffsetX = -0.5f;
   private const float OffsetZ = -0.26f;
-  private List<(int, int)> deserts;
-  private List<(int, int)> forests;
-  private List<(int, int)> mountains;
-  private List<(int, int)> waters;
   [SerializeField] private List<GameObject> tilePrefabs = new(5);
+  private Dictionary<(int, int), int> biomeData = new Dictionary<(int, int), int>();
   // Start is called before the first frame update
   void Start()
   {
     GenerateMapBlueprint();
     SpawnTiles();
   }
-
   private void GenerateMapBlueprint()
   {
     tilesCollection = new List<Tile>();
-    //populate map data according to the image in a task document
-    deserts = new List<(int, int)> { (2, 2), (7, 3), (6, 4), (0, 4), (7, 4), (0, 5), (2, 5), (6, 5), (0, 6), (1, 6), (2, 6), (0, 7), (1, 7) };
-    forests = new List<(int, int)> { (3, 0), (5, 0), (1, 1), (3, 1), (4, 1), (0, 2), (1, 2), (3, 3), (5, 3), (1, 4), (3, 4), (5, 4), (1, 5), (3, 6), (5, 6), (7, 6), };
-    mountains = new List<(int, int)> { (0, 0), (1, 0), (2, 0), (2, 1), (4, 3), (4, 4), (5, 5), (6, 6), (5, 7), (6, 7) };
-    waters = new List<(int, int)> { (7, 0), (6, 1), (7, 1), (3, 7), (4, 2), (5, 2), (7, 2), (0, 3), (1, 3), (2, 3), (2, 4) };
-    for (int x = 0; x < MapSizeX; x += 1)
+
+    List<KeyValuePair<(int, int), int>> itemsToAdd = new()
     {
-      for (int z = 0; z < MapSizeZ; z += 1)
+    new((2, 2), 1),
+    new((7, 3), 1),
+    new((6, 4), 1),
+    new((0, 4), 1),
+    new((7, 4), 1),
+    new((0, 5), 1),
+    new((2, 5), 1),
+    new((6, 5), 1),
+    new((0, 6), 1),
+    new((1, 6), 1),
+    new((2, 6), 1),
+    new((0, 7), 1),
+    new((1, 7), 1),
+
+    new((3, 0), 0),
+    new((5, 0), 0),
+    new((1, 1), 0),
+    new((3, 1), 0),
+    new((4, 1), 0),
+    new((0, 2), 0),
+    new((1, 2), 0),
+    new((3, 3), 0),
+    new((5, 3), 0),
+    new((1, 4), 0),
+    new((3, 4), 0),
+    new((5, 4), 0),
+    new((1, 5), 0),
+    new((3, 6), 0),
+    new((5, 6), 0),
+    new((7, 6), 0),
+
+    new((0, 0), 2),
+    new((1, 0), 2),
+    new((2, 0), 2),
+    new((2, 1), 2),
+    new((4, 3), 2),
+    new((4, 4), 2),
+    new((5, 5), 2),
+    new((6, 6), 2),
+    new((5, 7), 2),
+    new((6, 7), 2),
+
+    new((7, 0), 4),
+    new((6, 1), 4),
+    new((7, 1), 4),
+    new((3, 7), 4),
+    new((4, 2), 4),
+    new((5, 2), 4),
+    new((7, 2), 4),
+    new((0, 3), 4),
+    new((1, 3), 4),
+    new((2, 3), 4),
+    new((2, 4), 4)
+};
+foreach (var item in itemsToAdd)
+{
+  biomeData.Add(item.Key, item.Value);
+}
+
+    //populate map data according to the image in a task document
+    for (int x = 0; x < MapSizeX; x++)
+    {
+      for (int z = 0; z < MapSizeZ; z++)
       {
-        if (deserts.Contains((x, z)))
+        if (biomeData.ContainsKey((x, z)))
         {
-          mapData.Add((x, z), 1);
+          mapData.Add((x, z), biomeData[(x, z)]);
         }
-        if (mountains.Contains((x, z)))
+        else
         {
-
-          mapData.Add((x, z), 2);
-        }
-        if (forests.Contains((x, z)))
-        {
-
-          mapData.Add((x, z), 3);
-        }
-        if (waters.Contains((x, z)))
-        {
-
-          mapData.Add((x, z), 4);
+          mapData.Add((x, z), 0); // Default to empty tile
         }
       }
     }
@@ -85,13 +128,13 @@ public class TileMap : MonoBehaviour
 
     }
   }
-  
+
   public Tile FindTile((int x, int z) coords)
   {
     foreach (var t in tilesCollection)
     {
-      if(t.Coordinates == coords && t.Cost != -1)
-      return t;
+      if (t.Coordinates == coords && t.Cost != -1)
+        return t;
     }
     return null;
   }
