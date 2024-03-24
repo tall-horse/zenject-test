@@ -10,6 +10,7 @@ public class TileMap : MonoBehaviour
   public const int MapSizeZ = 8;
   public Dictionary<(int X, int Z), int> mapData = new();
   [HideInInspector] public List<Tile> tilesCollection;
+  [Inject] private DiContainer _container;
   private const float OffsetX = -0.5f;
   private const float OffsetZ = -0.26f;
   [SerializeField] private List<GameObject> tilePrefabs = new(5);
@@ -114,12 +115,13 @@ public class TileMap : MonoBehaviour
         {
           spawnPosition = new Vector3(x, 0, z + OffsetZ * z);
         }
-        tile = Instantiate(tilePrefabs[mapData.FirstOrDefault(t => t.Key == (x, z)).Value].gameObject, spawnPosition, Quaternion.identity).GetComponent<Tile>();
-        tile.Construct(this);
+        tile = _container.InstantiatePrefab(tilePrefabs[mapData.FirstOrDefault(t => t.Key == (x, z)).Value]).GetComponent<Tile>();
+        tile.transform.position = spawnPosition;
+        tile.transform.rotation = Quaternion.identity;
         tile.transform.SetParent(transform);
         tile.Coordinates = (x, z);
-        tilesCollection.Add(tile);
         tile.TextRespresentation.text = tile.Coordinates.X + "," + tile.Coordinates.Z;
+        tilesCollection.Add(tile);
       }
 
     }
