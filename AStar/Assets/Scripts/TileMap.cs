@@ -123,7 +123,7 @@ foreach (var item in itemsToAdd)
         tile.transform.SetParent(transform);
         tile.Coordinates = (x, z);
         tilesCollection.Add(tile);
-        tile.GetComponentInChildren<TextMeshProUGUI>().text = tile.Coordinates.X + "," + tile.Coordinates.Z;
+        tile.TextRespresentation.text = tile.Coordinates.X + "," + tile.Coordinates.Z;
       }
 
     }

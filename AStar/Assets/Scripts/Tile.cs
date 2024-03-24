@@ -4,6 +4,7 @@ using Pathing;
 using System.Linq;
 using System;
 using Zenject;
+using TMPro;
 
 public class Tile : MonoBehaviour, IAStarNode, ITile
 {
@@ -14,6 +15,7 @@ public class Tile : MonoBehaviour, IAStarNode, ITile
   [field: SerializeField] public Material HighlightMaterial { get; private set; }
   [field: SerializeField] public Material SelectedMaterial { get; private set; }
   [field: SerializeField] public Material PartOfThePathMaterial { get; private set; }
+  [field: SerializeField] public TextMeshProUGUI TextRespresentation {get; private set;}
   [Inject]
   private TileMap _tileMap;
 
@@ -29,7 +31,7 @@ public class Tile : MonoBehaviour, IAStarNode, ITile
     }
     void Awake()
     {
-      _tileMap = FindObjectOfType<TileMap>();
+      TextRespresentation = GetComponentInChildren<TextMeshProUGUI>();
     }
   private void AddNeighbour(Tile? tile, List<Tile> neighbours)
   {
@@ -45,7 +47,6 @@ public class Tile : MonoBehaviour, IAStarNode, ITile
 
   public IEnumerable<Tile> GetNeighbours()
   {
-    Debug.Log("tilemap value: " + _tileMap);
     List<Tile> neighbourList = new();
     bool oddRow = Coordinates.Z % 2 == 1;
     AddNeighbour(_tileMap.FindTile((Coordinates.X - 1, Coordinates.Z)), neighbourList);//left
